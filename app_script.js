@@ -281,6 +281,7 @@ function set_up_stages(){
 function set_up_main_page(short_option){
 	
 	check_location_chosen();
+	add_new_bands();
 	console.log("setting up...");
 	console.log("short_option = "+short_option);
 	var fulldate=getFulldate();
@@ -1465,8 +1466,8 @@ function swap_place(location){
 		$("#hylands").removeClass("chosen_place");
 		db.transaction(function (txs) {
 			//make all bands have weston day
-				txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id in (1,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24,25,26,37,38,39,40,41,42,43,44,45,46,55,56,57,58,59,60,61,69,70,71,72,73,74,75,76,77,78,79)');
-				txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id in (9,10,11,12,13,14,15,16,27,28,29,30,31,32,33,34,35,36,47,48,49,50,51,52,53,54,62,63,64,65,66,67,68,80,81,82,83,84,85,86,87,88,89,90,91)');
+				txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id in (9,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24,25,26,37,38,39,40,41,42,43,44,45,46,55,56,57,58,59,60,61,69,70,71,72,73,74,75,76,77,78,79)');
+				txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id in (1,10,11,12,13,14,15,16,27,28,29,30,31,32,33,34,35,36,47,48,49,50,51,52,53,54,62,63,64,65,66,67,68,80,81,82,83,84,85,86,87,88,89,90,91,92,93)');
 		});
 	}
 	if(location=="hylands"){
@@ -1474,8 +1475,8 @@ function swap_place(location){
 		$("#weston").removeClass("chosen_place");
 		db.transaction(function (txs) {
 			//make all bands have weston day
-				txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id in (9,10,11,12,13,14,15,16,27,28,29,30,31,32,33,34,35,36,47,48,49,50,51,52,53,54,62,63,64,65,66,67,68,80,81,82,83,84,85,86,87,88,89,90,91)');
-				txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id in (1,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24,25,26,37,38,39,40,41,42,43,44,45,46,55,56,57,58,59,60,61,69,70,71,72,73,74,75,76,77,78,79)');
+				txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id in (1,10,11,12,13,14,15,16,27,28,29,30,31,32,33,34,35,36,47,48,49,50,51,52,53,54,62,63,64,65,66,67,68,80,81,82,83,84,85,86,87,88,89,90,91,92,93)');
+				txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id in (9,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24,25,26,37,38,39,40,41,42,43,44,45,46,55,56,57,58,59,60,61,69,70,71,72,73,74,75,76,77,78,79)');
 		});
 	}
 	set_up_main_page("swap");
@@ -1483,18 +1484,22 @@ function swap_place(location){
 }
 function check_location_chosen(){
 	 db.transaction(function (txs) {
-		 			txs.executeSql('select day from bands where id=1', [], function(txs, results){			
+		 			txs.executeSql('select day from bands where id=8', [], function(txs, results){			
 								var day = results.rows.item(0);
 								console.log("checked day = "+day.day);
 								if(day.day=="20150822"){
 									//weston
 									$("#weston").addClass("chosen_place");
 									$("#hylands").removeClass("chosen_place");
+									txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id =1 ');
+									txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id =9 ');
 								}
 								if(day.day=="20150823"){
 									//hylands
 									$("#hylands").addClass("chosen_place");
 									$("#weston").removeClass("chosen_place");
+									txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id =1 ');
+									txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id =9 ');
 								}
 					});
 						
@@ -1507,4 +1512,29 @@ function stage_panel_select_text(){
 	var stage_viewing = $("#stage_name_heading").text();
 	//console.log(stage_viewing);
 	$("#Stage_panel_heading_text").text(stage_viewing);
+}
+
+
+
+function add_new_bands(){
+	 db.transaction(function (txs) {
+		 			txs.executeSql('select day from bands where id=8', [], function(txs, results){			
+								var day = results.rows.item(0);
+								
+								if(day.day=="20150822"){
+									//weston
+									txs.executeSql('INSERT INTO bands (id, band_name, stage, day, start_time, finish_time, band_fav, stage_rank, day_name) VALUES (92, "Seafret", "The Arena", 20150823, 1205, 1235, 0, 2, "Sunday")');
+									txs.executeSql('INSERT INTO bands (id, band_name, stage, day, start_time, finish_time, band_fav, stage_rank, day_name) VALUES (93, "Zac Samuel/James Glover", "Dance Tent", 20150823, 1300, 1330, 0, 3, "Sunday")');
+
+								}
+								if(day.day=="20150823"){
+									//hylands
+									txs.executeSql('INSERT INTO bands (id, band_name, stage, day, start_time, finish_time, band_fav, stage_rank, day_name) VALUES (92, "Seafret", "The Arena", 20150822, 1205, 1235, 0, 2, "Saturday")');
+									txs.executeSql('INSERT INTO bands (id, band_name, stage, day, start_time, finish_time, band_fav, stage_rank, day_name) VALUES (93, "Zac Samuel/James Glover", "Dance Tent", 20150822, 1300, 1330, 0, 3, "Saturday")');
+
+								}
+					});
+						
+	 });
+					
 }
