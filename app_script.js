@@ -278,9 +278,11 @@ function set_up_stages(){
 
 
 
-function set_up_main_page(){
-	console.log("setting up...");
+function set_up_main_page(short_option){
 	
+	check_location_chosen();
+	console.log("setting up...");
+	console.log("short_option = "+short_option);
 	var fulldate=getFulldate();
 	var time = getFulltime();
 	//alert(fulldate);
@@ -289,8 +291,11 @@ function set_up_main_page(){
 	//sql to select all unique dates.
 	//create array as unknown lenght
 	
+	
 	db.transaction(function (txs) {
 		
+		
+		if(short_option===undefined){
 		//how many stages?
 		txs.executeSql('select DISTINCT stage_rank, stage from bands order by stage_rank ASC', [], function(txs, results){
 							var len = results.rows.length, i;
@@ -330,12 +335,13 @@ function set_up_main_page(){
 							//console.log("total stages, hammer aor and doom "+total_stages);
 							//begin output of now playing boxes.
 						});
-						
+	}//undefined special check
 		
 		
 						//find the days the festival is on for
 						//also finds the number of days
 						txs.executeSql('select day,day_name from bands group by day order by day asc', [], function(txs, results){
+							if(short_option===undefined){
 							var len = results.rows.length, i;
 							for(i=0;i<len;i++)
 								{	
@@ -351,6 +357,9 @@ function set_up_main_page(){
 								var extra_day = BandRecord.day+1;
 								console.log(extra_day);
 								//if txs is closeed it runs in background and it doesnt add days therefore it skips what would be after
+								
+								
+							}//--end special check
 								
 								//if today is one of the days bands play pull out the bands
 								//alert(day_arr);
@@ -429,11 +438,13 @@ function set_up_main_page(){
 						for(var i = 0; i<=total_stages;i++){
 									next_bands(txs,i,fulldate,time);
 								}
-						
+							if(short_option===undefined){
 									set_up_lineup_page();
+							}
 								}else{
-								
+								if(short_option===undefined){
 									set_up_lineup_page();
+								}
 									$("#not_time").html("Once This Festival Starts Bands Will Appear Here. Make Sure App is Up To Date Before Going To Festival. <br/><br/>");
 								}
 								
@@ -1447,6 +1458,48 @@ function lineup_content_az(BandRecord){
 
 	
 	return content;
+}
+function swap_place(location){
+	if(location=="weston"){
+		$("#weston").addClass("chosen_place");
+		$("#hylands").removeClass("chosen_place");
+		db.transaction(function (txs) {
+			//make all bands have weston day
+				txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id in (1,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24,25,26,37,38,39,40,41,42,43,44,45,46,55,56,57,58,59,60,61,69,70,71,72,73,74,75,76,77,78,79)');
+				txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id in (9,10,11,12,13,14,15,16,27,28,29,30,31,32,33,34,35,36,47,48,49,50,51,52,53,54,62,63,64,65,66,67,68,80,81,82,83,84,85,86,87,88,89,90,91)');
+		});
+	}
+	if(location=="hylands"){
+		$("#hylands").addClass("chosen_place");
+		$("#weston").removeClass("chosen_place");
+		db.transaction(function (txs) {
+			//make all bands have weston day
+				txs.executeSql('UPDATE bands SET day="20150822", day_name="Saturday" WHERE id in (9,10,11,12,13,14,15,16,27,28,29,30,31,32,33,34,35,36,47,48,49,50,51,52,53,54,62,63,64,65,66,67,68,80,81,82,83,84,85,86,87,88,89,90,91)');
+				txs.executeSql('UPDATE bands SET day="20150823", day_name="Sunday" WHERE id in (1,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24,25,26,37,38,39,40,41,42,43,44,45,46,55,56,57,58,59,60,61,69,70,71,72,73,74,75,76,77,78,79)');
+		});
+	}
+	set_up_main_page("swap");
+	
+}
+function check_location_chosen(){
+	 db.transaction(function (txs) {
+		 			txs.executeSql('select day from bands where id=1', [], function(txs, results){			
+								var day = results.rows.item(0);
+								console.log("checked day = "+day.day);
+								if(day.day=="20150822"){
+									//weston
+									$("#weston").addClass("chosen_place");
+									$("#hylands").removeClass("chosen_place");
+								}
+								if(day.day=="20150823"){
+									//hylands
+									$("#hylands").addClass("chosen_place");
+									$("#weston").removeClass("chosen_place");
+								}
+					});
+						
+	 });
+					
 }
 
 function stage_panel_select_text(){
